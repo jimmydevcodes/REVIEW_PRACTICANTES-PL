@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Participante extends Model
 {
+    protected $table = 'participantes';
+    protected $primaryKey = 'id_participante';
     public $timestamps = false;
     
-    protected $primaryKey = 'id_participante';
-
     protected $fillable = [
         'id_participante',
         'user_id',
@@ -29,36 +29,36 @@ class Participante extends Model
         'id_cargo' => 'integer'
     ];
 
+    /**
+     * Relación con User
+     */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
-     * Relación con proyectos
-     * Un participante puede estar en varios proyectos
+     * Relación con Proyectos (muchos a muchos)
      */
     public function proyectos()
     {
-        return $this->belongsToMany(Proyecto::class, 'participante_proyecto', 
-            'id_participante', 'id_proyecto')
-            ->withPivot('rol_en_proyecto', 'fecha_asignacion');
+        return $this->belongsToMany(
+            Proyecto::class,
+            'participante_proyecto',
+            'id_participante',       // FK en tabla pivote que referencia participantes
+            'id_proyecto',           // FK en tabla pivote que referencia proyectos
+            'id_participante',       // PK en tabla participantes
+            'id_proyecto'            // PK en tabla proyectos
+        )
+        ->withPivot('rol_en_proyecto', 'fecha_asignacion');
     }
 
     /**
-     * Relación con grupos (a través de proyectos)
-     * Un participante puede estar en varios grupos a través de sus proyectos
+     * Proyectos activos del participante
      */
-    public function grupos()
+    public function proyectosActivos()
     {
-        return $this->hasManyThrough(
-            Grupo::class,
-            Proyecto::class,
-            'id_grupo',  // Foreign key en proyectos
-            'id_grupo',  // Foreign key en grupos
-            'id_participante', // Local key en participantes
-            'id_grupo'   // Local key en proyectos
-        );
+        return $this->proyectos()->where('proyectos.Estado', 'activo');
     }
 
     /**
@@ -75,5 +75,22 @@ class Participante extends Model
     public function cargo()
     {
         return $this->belongsTo(Cargo::class, 'id_cargo', 'id_cargo');
+    }
+
+    /**
+     * Obtener nombre completo
+     */
+    public function getNombreCompletoAttribute()
+    {
+        return "{$this->nombre} {$this->apellido}";
+    }
+
+    /**
+     * Scope para buscar por nombre
+     */
+    public function scopeBuscarPorNombre($query, $nombre)
+    {
+        return $query->where('nombre', 'like', "%{$nombre}%")
+                     ->orWhere('apellido', 'like', "%{$nombre}%");
     }
 }

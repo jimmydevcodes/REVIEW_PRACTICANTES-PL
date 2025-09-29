@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Proyecto extends Model
 {
@@ -73,20 +72,19 @@ class Proyecto extends Model
     /**
      * Relación con Participantes (muchos a muchos)
      */
-/**
- * Relación con Participantes (muchos a muchos)
- */
     public function participantes()
     {
         return $this->belongsToMany(
             Participante::class,
             'participante_proyecto',
-            'id_proyecto',           // Foreign key en tabla pivot que referencia proyectos
-            'id_participante',       // Foreign key en tabla pivot que referencia participantes  
-            'id_proyecto',           // Local key en tabla proyectos
-            'id_participante'        // Local key en tabla participantes
-        )->withPivot('rol_en_proyecto', 'fecha_asignacion');
+            'id_proyecto',           // FK en tabla pivote que referencia proyectos
+            'id_participante',       // FK en tabla pivote que referencia participantes  
+            'id_proyecto',           // PK en tabla proyectos
+            'id_participante'        // PK en tabla participantes
+        )
+        ->withPivot('rol_en_proyecto', 'fecha_asignacion');
     }
+
     /**
      * Relación con Tareas
      */
