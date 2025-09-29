@@ -11,7 +11,7 @@ class CreateGruposTable extends Migration
         Schema::create('grupos', function (Blueprint $table) {
             $table->id('id_grupo');
             $table->string('nombre_grupo');
-            $table->string('codigo_clave')->unique(); // ← AGREGAR ESTA LÍNEA
+            $table->string('codigo_clave')->unique(); // Clave única
             $table->text('descripcion')->nullable();
             $table->timestamp('fecha_creacion')->useCurrent();
             $table->unsignedBigInteger('creado_por');
